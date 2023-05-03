@@ -13,6 +13,7 @@ use BZpoultryfarm\order_list;
 use BZpoultryfarm\User;
 use BZpoultryfarm\Customers;
 use Input;
+use Carbon\Carbon;
 
 class OrdersController extends Controller
 {
@@ -21,16 +22,26 @@ class OrdersController extends Controller
       $this->middleware('admin');
     }
 //show all orders
-    public function show()
+    public function show(Request $request)
     {
       //$orders = Orders::all()
+        $from = $request->input('from') ?? Carbon::now()->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
+
        $orders = \DB::table('orders')
                     ->join('customers', 'cust_email', '=', 'email')
-                     ->select('orders.*', 'customers.*')
-                     ->orderBy('order_id', 'desc')
+                    ->leftJoin('order_details', 'orders.order_id', '=', 'order_details.order_id')
+                    ->leftJoin('products', 'order_details.product_name', '=', 'products.name')
+                     ->select('orders.*', 'customers.lname', 'customers.fname', 'customers.mname', 'customers.email', 
+                                'customers.company', 'customers.address', 'customers.contact', 
+                                \DB::raw("CASE 
+                                    WHEN order_details.quantity > products.stocks AND orders.status = 'Reserved' THEN 1
+                                    ELSE 0
+                                END AS disabled"))
+                     ->orderBy('orders.order_id', 'desc')
                      ->paginate(10);
       
-      return view('admin.orders', ['user' => Auth::user(), 'orders' => $orders]);
+      return view('admin.orders', ['user' => Auth::user(), 'orders' => $orders, 'from'=>$from, 'to'=>$to]);
     }
 
     //show searched record
@@ -39,10 +50,10 @@ class OrdersController extends Controller
         $fromDate = $request->input('fromDate');
         $toDate = $request->input('toDate');
 
-        $orders = Orders::whereBetween('trans_date', [$fromDate, $toDate])->paginate(10);
+        $orders = Orders::whereBetween('trans_date', [$fromDate. ' 00:00:00', $toDate . ' 23:59:00'])->paginate(10);
         
 
-        return view('admin.orders', ['user' => Auth::user(), 'orders' => $orders]);
+        return view('admin.orders', ['user' => Auth::user(), 'orders' => $orders, 'from'=>$fromDate, 'to'=>$toDate]);
         
     }
 

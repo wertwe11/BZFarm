@@ -6,7 +6,7 @@
 
 <br><br><br><br><br><br>
 
-<h4 class="text-center">Note: you may reserve items with a minimum quantity of 30. Items that are not shown below are unavailable for reservation.</h4>
+<h4 class="text-center">Note: you may reserve items with a minimum quantity of 1 Tray. Items that are not shown below are unavailable for reservation.</h4>
 
 <div class="row">
 	
@@ -31,7 +31,7 @@
 						<div class="text-center">
 							<form method="POST" action="/menu">
 								<div class="form-group col-lg-">
-									<input class="form-control" placeholder="Quantity" type="number" name="quantity" autocomplete="off" min="30" max="{{$products->stocks}}" required>
+									<input class="form-control" placeholder="Quantity per Tray" type="number" name="quantity" autocomplete="off" min="30" max="{{$products->stocks}}" required>
 								</div>
 		              			<input type="hidden" name="product_id" value="{{$products->id}}">
 		              			<input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -55,7 +55,7 @@
 						<div class="text-center">
 							<form method="POST" action="/menu">
 								<div class="form-group">
-									<input class="form-control" placeholder="Quantity" type="number" name="quantity" autocomplete="off" size="2" min="30" max="{{$products->stocks}}" required>
+									<input class="form-control" placeholder="Quantity per Tray" type="number" name="quantity" autocomplete="off" size="2" min="30" max="{{$products->stocks}}" required>
 								</div>
 		              			<input type="hidden" name="product_id" value="{{$products->id}}">
 		              			<input type="hidden" name="_token" value="{{ csrf_token() }}">

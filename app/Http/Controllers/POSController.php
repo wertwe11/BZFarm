@@ -90,7 +90,7 @@ class POSController extends Controller
 	}
 
     $all = Products::where('name', 'not like', '%Eggs%')->get();
-    $eggs = Products::where('name', 'like', '%Eggs%')->get();
+    $eggs = Products::selectRaw("*, CAST(stocks / 30 as signed)  AS tray")->where('name', 'like', '%Eggs%')->get();
     $orders = order_list::all();
     $gettotal = order_list::orderBy('id', 'desc')->first();
 	//if empty, no orders

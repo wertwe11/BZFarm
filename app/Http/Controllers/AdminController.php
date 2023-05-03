@@ -260,4 +260,43 @@ class AdminController extends Controller
         , 'chickens' => $chickens, 'prescription' => $vet->prescription, 'diagnosis' => $vet->diagnosis, 'acknowledge' => $vet->acknowledge]);
     }
 
+    public function dashboardRange(Request $request)
+    {
+
+        $from = $request->input('from') ?? Carbon::now()->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
+
+        $from_time = $from . ' 00:00:00';
+        $to_time = $to . ' 23:59:00';
+
+        $newcust = Customers::whereBetween('created_at', [$from_time, $to_time])->count('id');
+        $orders = Orders::whereBetween('trans_date', [$from_time, $to_time])->where('status', '=', 'Successful')->take(5)->get();
+        
+        $dead = DeadChickens::whereBetween('created_at', [$from_time, $to_time])->sum('quantity'); 
+        
+        $feeds = Feeds::whereBetween('created_at', [$from_time, $to_time])->sum('quantity');
+        $reorder = Feeds::whereBetween('created_at', [$from_time, $to_time])->sum('reorder_level');
+        $act = Activity::orderBy('date_time', 'desc')->take(5)->get();
+        $sales = Sales::where('trans_date', '=', Carbon::now()->toDateString())->sum('total_cost');
+        $totalsales = Sales::whereBetween('trans_date', [$from_time, $to_time])->sum('total_cost');
+
+        $meds = Medicines::all();
+        $medstotal= Medicines::sum('quantity');
+
+        $suppliescost = Supplies::whereBetween('updated_at', [$from_time, $to_time])->sum(\DB::raw('price * quantity'));
+        $feedscost = Feeds::whereBetween('updated_at', [$from_time, $to_time])->sum(\DB::raw('price * quantity'));
+        $medicinecost = Medicines::whereBetween('updated_at', [$from_time, $to_time])->sum(\DB::raw('price * quantity'));
+        $totalcost = $suppliescost + $feedscost + $medicinecost;
+
+        $chickens = InventoryChanges::where('type', '=', 'Chickens')->get();
+        $chickenstotal= Chickens::whereBetween('created_at', [$from_time, $to_time])->sum('quantity');
+        $vet = Vet::orderBy('id', 'desc')->first();
+
+
+    	return view('admin.index')->with(['user' => Auth::user(), 'date' => Carbon::now()->format('l, j F Y'), 'orders' => $orders
+        , 'dead' => $dead, 'newcust' => $newcust, 'totalcost'=> $totalcost ,'feeds' => $feeds, 'chickenstotal'=> $chickenstotal, 'medstotal'=>$medstotal,'totalsales'=> $totalsales, 'reorder' => $reorder, 'act' => $act, 'sales' => $sales, 'meds' => $meds
+        , 'chickens' => $chickens, 'prescription' => $vet->prescription, 'diagnosis' => $vet->diagnosis, 'acknowledge' => $vet->acknowledge, 'from'=>$from, 'to'=>$to]);
+    }
+
+
 }

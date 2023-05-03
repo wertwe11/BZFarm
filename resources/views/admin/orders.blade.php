@@ -42,9 +42,9 @@
 			@csrf
 			<div class="form-group row">
 				<label for="date">Start Date</label>
-				<input type="date" name="fromDate" id="fromDate">
+				<input type="date" name="fromDate" id="fromDate" value="{{ $from }}">
 				<label for="date">End Date</label>
-				<input type="date" name="toDate" id="toDate">
+				<input type="date" name="toDate" id="toDate" value="{{ $to }}">
 				<button type="submit" class="btn btn-md btn-info" name="searchorder" title="search">Search</button>
 				
 			</div>
@@ -85,7 +85,7 @@
 							<td>{{ $order->status }}</td>
 							<td class="td-actions text-right">
 								@if ($order->status == 'Reserved')
-								<button type="button" rel="tooltip" title="Confirm" class="btn btn-success btn-simple btn-xs" onclick="window.location.href='/orders/confirm-reservation/{{ $order->id }}'">
+								<button @if ($order->disabled) disabled @endif type="button" rel="tooltip" title="Confirm" class="btn btn-success btn-simple btn-xs" onclick="window.location.href='/orders/confirm-reservation/{{ $order->id }}'">
 									<i class="material-icons">check</i>
 								</button>
 								<button type="button" rel="tooltip" title="Cancel" class="btn btn-danger btn-simple btn-xs" onclick="window.location.href='/orders/cancel-reservation/{{ $order->id }}'">

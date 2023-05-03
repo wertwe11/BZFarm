@@ -217,6 +217,17 @@
 
 @else
 
+<div class="row">
+    <form action="{{route('dashboardRange')}}" method="GET">
+        <div class="form-group row">
+            <label for="date">Start Date</label>
+            <input type="date" name="from" id="from" value="{{ $from }}">
+            <label for="date">End Date</label>
+            <input type="date" name="to" id="to" value="{{ $to }}">
+            <button type="submit" class="btn btn-md btn-info">Search</button>
+        </div>
+    </form>
+</div>
 
 
 <div class="row">
@@ -257,7 +268,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 col-sm-6">
+    <!-- <div class="col-lg-3 col-md-6 col-sm-6">
         <div class="card card-stats">
             <div class="card-header" data-background-color="green">
                 <i class="no-italics material"><small>PHP</small></i>
@@ -279,6 +290,34 @@
             <div class="card-footer">
                 <div class="stats">
                     <i class="material-icons">date_range</i> Within today.
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    
+    <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+            <div class="card-header" data-background-color="red">
+            <i class="material-icons">content_paste</i>
+            </div>
+            <div class="card-content">
+                <p class="category">Inventory Valuation</p>
+                
+
+                <h3 class="title">
+		
+                @if ($totalcost == 0)
+                  0.00
+                @else
+                {{ $totalcost }}.00
+                @endif
+       
+                </h3>
+            </div>
+            <div class="card-footer">
+                <div class="stats">
+                    <i class="material-icons">update</i> Feed,Med,Supplies.
                 </div>
             </div>
         </div>
@@ -365,32 +404,6 @@
         </div>
     </div>
 
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="card card-stats">
-            <div class="card-header" data-background-color="red">
-            <i class="material-icons">content_paste</i>
-            </div>
-            <div class="card-content">
-                <p class="category">Inventory Valuation</p>
-                
-
-                <h3 class="title">
-		
-                @if ($totalcost == 0)
-                  0.00
-                @else
-                {{ $totalcost }}.00
-                @endif
-       
-                </h3>
-            </div>
-            <div class="card-footer">
-                <div class="stats">
-                    <i class="material-icons">update</i> Feed,Med,Supplies.
-                </div>
-            </div>
-        </div>
-    </div>
 
 
 

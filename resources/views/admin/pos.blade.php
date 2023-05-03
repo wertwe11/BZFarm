@@ -103,7 +103,7 @@
 							<td>{{ $item->name }}</td>
 							<td>P{{ $item->retail_price }}</td>
 							<td>P{{ $item->wholesale_price }}</td>
-							<td>{{ $item->stocks }}</td>
+							<td>{{ $item->tray }} tray/s</td>
 							<td class="td-actions text-right">
 								<button type="button" rel="tooltip" title="Add This" class="btn btn-success btn-simple btn-xs add-modal" data-id="{{ $item->id }}" data-name="{{ $item->name }}" data-retail="{{ $item->retail_price }}" data-wholesale="{{ $item->wholesale_price }}" data-stocks="{{ $item->stocks }}">
 									<i class="material-icons">add_circle_outline</i>

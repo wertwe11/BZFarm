@@ -97,7 +97,7 @@ Route::group(['middleware' => 'admin'], function() {
 		Route::get('admin/archives', 'AdminController@archivesUser');
 
   	// Dashboard
-	Route::get('admin/dash', 'AdminController@index');
+	Route::get('admin/dash', 'AdminController@dashboardRange')->name('dashboardRange');
 
 	// POS
 	Route::get('pos', 'POSController@index');
