@@ -150,7 +150,7 @@
 						@foreach ($orders as $order)
 						<tr>
 							<td>{{ $order->product_name }}</td>
-							<td>{{ $order->quantity }}</td>
+							<td>{{ $order->eggs ?? $order->quantity }}</td>
 							<td>P{{ $order->order_price }}</td>
 							<td class="td-actions text-right">
 								<button type="button" rel="tooltip" title="Cancel This" class="btn btn-danger btn-simple btn-xs" onclick="window.location.href='/pos/cancel/{{ $order->id }}'">

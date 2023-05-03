@@ -91,7 +91,7 @@ class POSController extends Controller
 
     $all = Products::where('name', 'not like', '%Eggs%')->get();
     $eggs = Products::selectRaw("*, CAST(stocks / 30 as signed)  AS tray")->where('name', 'like', '%Eggs%')->get();
-    $orders = order_list::all();
+    $orders = order_list::selectRaw("*, CASE WHEN product_name like '%Eggs%' THEN CAST(quantity / 30 as signed) ELSE quantity END as eggs")->get();
     $gettotal = order_list::orderBy('id', 'desc')->first();
 	//if empty, no orders
     if (empty($gettotal))
@@ -107,6 +107,9 @@ class POSController extends Controller
    //current orders
    public function currentOrder(Request $request)
 	{
+		if(strpos(strtolower($request->name), 'eggs')){
+			$request->quantity = $request->quantity * 30;
+		}
 		$getlast = order_list::orderBy('id', 'desc')->first();
 
 		if (empty($getlast))

@@ -341,7 +341,7 @@ class HomeController extends Controller
 
             $confirm->order_id = $orderid;
             $confirm->product_name = $item->name;
-            $confirm->quantity = $item->qty;
+            $confirm->quantity = (strpos(strtolower($item->name), 'eggs')) ? $item->qty * 30 : $item->qty;
             $confirm->unit_price = $item->price;
 
             $confirm->save();
