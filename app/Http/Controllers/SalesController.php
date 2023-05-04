@@ -38,7 +38,7 @@ class SalesController extends Controller
         //$sales = Sales::orderBy('id', 'desc')->paginate(10);
         
         $sales = \DB::table('sales')
-                    ->join('customers', 'email', '=', 'cust_email')
+                    ->leftJoin('customers', 'email', '=', 'cust_email')
                      ->select('sales.*', 'customers.*')
                      ->orderBy('trans_id', 'desc')
                      ->paginate(10);

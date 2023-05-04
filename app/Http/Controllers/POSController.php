@@ -108,7 +108,7 @@ class POSController extends Controller
    public function currentOrder(Request $request)
 	{
 		if(strpos(strtolower($request->name), 'eggs')){
-			$request->quantity = $request->quantity * 30;
+			$request->quantity = (int)$request->quantity * 30;
 		}
 		$getlast = order_list::orderBy('id', 'desc')->first();
 
