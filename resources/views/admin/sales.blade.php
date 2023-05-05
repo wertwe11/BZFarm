@@ -46,6 +46,18 @@
         </div>
     </div>
 
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header" data-background-color="blue">
+                <h4 class="title">Sales Statistic</h4>
+            </div>
+            <div class="card-content">
+                <canvas id="saleStatsChart" width="400" height="150"></canvas>
+                <br>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @endsection
@@ -98,6 +110,68 @@ $(document).ready(function(){
             };
 
             var ctx = $("#saleStats");
+
+            var saleStats = new Chart(ctx, {
+                type: 'line',
+                data: chartdata,
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        },
+        error: function(data) {
+            console.log(data);
+        }
+    });
+
+    $.ajax({
+        url: "/sales/sales-chart",
+        method: "GET",
+        data:{
+            from: $('#from').val(),
+            to: $('#to').val()
+        },
+        success: function(data) {
+            console.log('sales', data);
+
+            let x_label = [];
+            let sales = [];
+            let consumption = [];
+
+            const response = data;
+            for(let i=0;i<response.length;i++){
+                x_label.push(response[i].trans_date);
+                sales.push(response[i].total_sales);
+                consumption.push(response[i].consumption);
+            }
+
+            var chartdata = {
+                labels: x_label,
+                datasets : [
+                    {
+                        label: 'Sales',
+                        borderColor: 'rgb(75, 192, 192)',
+                        fill: false,
+                        tension: 0.1,
+                        data: sales
+                    },
+                    {
+                        label: 'Expenses',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false,
+                        tension: 0.1,
+                        data: consumption
+                    }
+                ]
+            };
+
+            var ctx = $("#saleStatsChart");
 
             var saleStats = new Chart(ctx, {
                 type: 'line',

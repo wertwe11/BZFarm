@@ -21,6 +21,7 @@ use BZpoultryfarm\Activity;
 use BZpoultryfarm\SoldEggs;
 use Carbon\Carbon;
 use PDF;
+use DB;
 
 class SalesController extends Controller
 {
@@ -60,6 +61,25 @@ class SalesController extends Controller
         
     }
 
+    public function salesChart(Request $request)
+    {
+        $from = $request->input('from') ?? Carbon::now()->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
+        
+        $from_time = $from . ' 00:00:00';
+        $to_time = $to . ' 23:59:00';
+
+        DB::statement("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+
+        $data = DB::table('sales as s')
+        ->leftJoin(DB::raw("(SELECT DATE(changed_at) as consume_date, sum(quantity * unit) as consumption FROM inventory_changes where activity='Used quantity' GROUP BY consume_date) AS o"), function ($join) {
+            $join->on('s.trans_date', '=', 'o.consume_date');
+        })->select(DB::raw('sum(s.total_cost) as total_sales'), 's.trans_date', 'o.*')
+        ->whereBetween('s.trans_date', [$from, $to])
+        ->groupBy('s.trans_date')->get();
+
+        return response()->json($data);
+    }
 
 
     // Show

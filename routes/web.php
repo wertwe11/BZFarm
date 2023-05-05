@@ -173,6 +173,7 @@ Route::group(['middleware' => 'admin'], function() {
 	// Sales
 	Route::get('sales', 'SalesController@show')->name('sales-range');
 	Route::get('sales/sales-stats', 'SalesController@salesStats');
+	Route::get('sales/sales-chart', 'SalesController@salesChart');
 	Route::get('sales/pdf', 'SalesController@SalesReport');
 	Route::get('sales/pdf2', 'SalesController@SalesReport2');
 
