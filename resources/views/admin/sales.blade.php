@@ -12,6 +12,17 @@
 @section ('content')
 
 <div class="row">
+    <form action="{{route('sales-range')}}" method="GET">
+        <div class="form-group row">
+            <label for="date">Start Date</label>
+            <input type="date" name="from" id="from" value="{{ $from }}">
+            <label for="date">End Date</label>
+            <input type="date" name="to" id="to" value="{{ $to }}">
+            <button type="submit" class="btn btn-md btn-info">Search</button>
+        </div>
+    </form>
+</div>
+<div class="row">
 
 
     <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
@@ -56,11 +67,24 @@ $(document).ready(function(){
     $.ajax({
         url: "/sales/sales-stats",
         method: "GET",
+        data:{
+            from: $('#from').val(),
+            to: $('#to').val()
+        },
         success: function(data) {
-            console.log(data);
+            console.log('data', data.data);
+
+            let x_label = [];
+            let values = [];
+
+            const response = data.data;
+            for(let i=0;i<response.length;i++){
+                x_label.push(response[i].trans_date);
+                values.push(response[i].total_cost);
+            }
 
             var chartdata = {
-                labels: ['Yesterday', 'Today'],
+                labels: x_label,
                 datasets : [
                     {
                         label: 'Sales',
@@ -68,7 +92,7 @@ $(document).ready(function(){
                         borderColor: 'rgba(255, 99, 132, 1)',
                         hoverBackgroundColor: 'rgba(255, 99, 132, 0.3)',
                         borderWidth: 1,
-                        data: [data[0], data[1]]
+                        data: values
                     }
                 ]
             };

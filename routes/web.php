@@ -153,12 +153,13 @@ Route::group(['middleware' => 'admin'], function() {
 	Route::get('customers/archives', 'CustomersController@custArchives');
 
 	// Production
-	Route::get('production', 'ProductionController@show');
+	Route::get('production', 'ProductionController@show')->name('prod-range');
 	Route::get('production/production-stats', 'ProductionController@prodStats');
+	Route::get('production/feed-consumption', 'ProductionController@feedConsumption');
 	Route::get('prod/pdf', 'ProductionController@ProdReport');
 
 	// Population
-	Route::get('population', 'PopulationController@show');
+	Route::get('population', 'PopulationController@show')->name('popu-range');
 	Route::get('population/population-stats', 'PopulationController@popStats');
 	Route::get('population/cull-stats', 'PopulationController@cullStats');
 	Route::get('population/dead-stats', 'PopulationController@deadStats');
@@ -169,7 +170,7 @@ Route::group(['middleware' => 'admin'], function() {
 	Route::get('population/pdf', 'PopulationController@ChickenReport');
 
 	// Sales
-	Route::get('sales', 'SalesController@show');
+	Route::get('sales', 'SalesController@show')->name('sales-range');
 	Route::get('sales/sales-stats', 'SalesController@salesStats');
 	Route::get('sales/pdf', 'SalesController@SalesReport');
 	Route::get('sales/pdf2', 'SalesController@SalesReport2');

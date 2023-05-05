@@ -12,6 +12,17 @@
 @section ('content')
 
 
+<div class="row">
+    <form action="{{route('prod-range')}}" method="GET">
+        <div class="form-group row">
+            <label for="date">Start Date</label>
+            <input type="date" name="from" id="from" value="{{ $from }}">
+            <label for="date">End Date</label>
+            <input type="date" name="to" id="to" value="{{ $to }}">
+            <button type="submit" class="btn btn-md btn-info">Search</button>
+        </div>
+    </form>
+</div>
 	
 <div class="row">
 
@@ -84,6 +95,34 @@
     
 </div>
 
+<div class="row">
+	<div class="col-lg-12">
+        <div class="card">
+	        <div class="card-header" data-background-color="green">
+	            <h4 class="title">Feed Consumption Statistics</h4>
+	        </div>
+	        <div class="card-content">
+
+				<table class="table table-responsive table-hover" id="items">
+					<thead class="text-primary bold">
+						<tr>
+							<th>Date</th>
+							<th>Current Chicken</th>
+							<th>Feed stock in grams</th>
+							<th>Feed stock left</th>
+							<th>Feed stock left in %</th>
+						</tr>
+					</thead>
+					<tbody id="fc">
+                        <tr>
+                            <td colspan="5"><center><b>No Record Found.</b></center></td>
+                        </tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
 @endsection
 
 @section ('scripts')
@@ -95,6 +134,10 @@ $(document).ready(function(){
     $.ajaxSetup({
       headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      },
+        data:{
+            from: $('#from').val(),
+            to: $('#to').val()
       }
     });
 
@@ -140,6 +183,31 @@ $(document).ready(function(){
                     }
                 }
             });
+        },
+        error: function(data) {
+            console.log(data);
+        }
+    });
+    $.ajax({
+        url: "/production/feed-consumption",
+        method: "GET",
+        success: function(data) {
+            console.log(data);
+            if(!data.length){
+               return false;
+            }
+            $('#fc').empty();
+            for(let i=0;i<data.length;i++){
+                const perc = (parseFloat(data[i].stock_left) / (parseFloat(data[i].stock_left) + parseFloat(data[i].consumption))) * 100
+                let row = `<tr>
+                            <td>${data[i].feed_date}</td>
+                            <td>${data[i].current_chicken}</td>
+                            <td>${data[i].consumption}</td>
+                            <td>${data[i].stock_left}</td>
+                            <td>${perc.toFixed(2)} %</td>
+                        </tr>`;
+                $('#fc').append(row);
+            }
         },
         error: function(data) {
             console.log(data);

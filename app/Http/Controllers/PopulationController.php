@@ -28,49 +28,60 @@ class PopulationController extends Controller
 
 	// Show page only when authenticated
 
-	public function __construct()
+    private $from;
+    private $to;
+    private $from_time;
+    private $to_time;
+
+	public function __construct(Request $request)
 	{
 		$this->middleware('admin');
+        $this->from = $request->input('from') ?? Carbon::now()->toDateString();
+        $this->to = $request->input('to') ?? Carbon::now()->toDateString();
+
+        $this->from_time = $this->from . ' 00:00:00';
+        $this->to_time = $this->to . ' 23:59:00';
+
 	}
 
     // Show
 
     public function show()
     {
-    	return view('admin.population')->with('user', Auth::user());
+    	return view('admin.population', ['from'=>$this->from, 'to'=>$this->to])->with('user', Auth::user());
     }
     //chart -> chicken
     public function popStats()
     {
-        $chickens = TotalChickens::all();
+        $chickens = TotalChickens::whereBetween('updated_at', [$this->from_time, $this->to_time])->get();
 
         return response()->json($chickens);
     }
     //chart -> culled chickens
     public function cullStats()
     {
-        $cull = Cull::take(5)->get();
+        $cull = Cull::whereBetween('updated_at', [$this->from_time, $this->to_time])->take(5)->get();
 
         return response()->json($cull);
     }
     //chart -> chicken mortality
     public function deadStats()
     {
-        $dead = DeadChickens::all();
+        $dead = DeadChickens::whereBetween('updated_at', [$this->from_time, $this->to_time])->get();
 
         return response()->json($dead);
     }
 
     public function popStatsPullets()
     {
-        $pullets = TotalPullets::all();
+        $pullets = TotalPullets::whereBetween('updated_at', [$this->from_time, $this->to_time])->get();
 
         return response()->json($pullets);
     }
 
     public function deadStatsPullets()
     {
-        $deadpullets = DeadPullets::all();
+        $deadpullets = DeadPullets::whereBetween('updated_at', [$this->from_time, $this->to_time])->get();
 
         return response()->json($deadpullets);
     }

@@ -35,20 +35,54 @@ class ProductionController extends Controller
 
     // Show
 
-    public function show()
+    public function show(Request $request)
     {
-        $eggs = Eggs::orderBy('id', 'desc')->first();
+        $from = $request->input('from') ?? Carbon::now()->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
 
-    	return view('admin.production', ['user' => Auth::user(), 'inv' => $eggs]);
+        $from_time = $from . ' 00:00:00';
+        $to_time = $to . ' 23:59:00';
+
+        $eggs = Eggs::whereBetween('created_at', [$from_time, $to_time])->orderBy('id', 'desc')->first();
+
+    	return view('admin.production', ['user' => Auth::user(), 'inv' => $eggs, 'from'=>$from, 'to'=>$to]);
     }
 
     // Load Chart Data
 
-    public function prodStats()
+    public function prodStats(Request $request)
     {
-        $weekly = Eggs::orderBy('created_at', 'desc')->take(7)->get();
+        $from = $request->input('from') ?? Carbon::now()->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
+
+        $from_time = $from . ' 00:00:00';
+        $to_time = $to . ' 23:59:00';
+
+        $weekly = Eggs::whereBetween('created_at', [$from_time, $to_time])->orderBy('created_at', 'desc')->take(7)->get();
 
         return response()->json($weekly);
+    }
+
+    public function feedConsumption(Request $request)
+    {
+        $from = $request->input('from') ?? Carbon::now()->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
+        
+        $from_time = $from . ' 00:00:00';
+        $to_time = $to . ' 23:59:00';
+
+        DB::statement("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+
+        $data = DB::table('chickens as c')
+        ->join(DB::raw("(SELECT DATE(changed_at) as feed_date, sum(quantity) as consumption FROM inventory_changes where unittype='grams' GROUP BY feed_date) AS o"), function ($join) {
+            $join->on(DB::raw('DATE(c.created_at)'), '=', 'o.feed_date');
+        })->join(DB::raw("(SELECT DATE(updated_at) as feed_stock_date, sum(quantity) as stock_left FROM feeds where unit='grams' GROUP BY feed_stock_date) AS n"), function ($join) {
+            $join->on(DB::raw('DATE(c.created_at)'), '=', 'n.feed_stock_date');
+        })->select(DB::raw('sum(c.quantity) as current_chicken'), 'o.*', 'n.*')
+        ->whereBetween('c.created_at', [$from_time, $to_time])
+        ->groupBy(DB::raw('DATE(c.created_at)'))->get();
+
+        return response()->json($data);
     } 
 
 

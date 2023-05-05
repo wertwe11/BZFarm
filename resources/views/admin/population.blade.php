@@ -11,6 +11,17 @@
 
 @section ('content')
 
+<div class="row">
+    <form action="{{route('popu-range')}}" method="GET">
+        <div class="form-group row">
+            <label for="date">Start Date</label>
+            <input type="date" name="from" id="from" value="{{ $from }}">
+            <label for="date">End Date</label>
+            <input type="date" name="to" id="to" value="{{ $to }}">
+            <button type="submit" class="btn btn-md btn-info">Search</button>
+        </div>
+    </form>
+</div>
 <form action="/population/pdf" method="post">
     <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
     <button type="button" title="Report" class="btn btn-md btn-info" onclick="window.open('/population/pdf', '_blank')">Generate Report</button>
@@ -118,6 +129,10 @@ $(document).ready(function(){
     $.ajaxSetup({
       headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      },
+      data:{
+        from: $('#from').val(),
+        to: $('#to').val()
       }
     });
 

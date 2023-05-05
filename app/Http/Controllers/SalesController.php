@@ -64,19 +64,24 @@ class SalesController extends Controller
 
     // Show
 
-    public function show()
+    public function show(Request $request)
     {
-    	return view('admin.sales')->with('user', Auth::user());
+        $from = $request->input('from') ?? Carbon::now()->subDay(1)->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
+
+    	return view('admin.sales', ['from'=>$from, 'to'=>$to])->with('user', Auth::user());
     }
 
- public function salesStats()
+ public function salesStats(Request $request)
     {
-        $yesterday = Carbon::now()->subDay(1);
-        $yesterday = Sales::where('trans_id', 'like', $yesterday->format('Ymd') . '%')->sum('total_cost');
+        // $yesterday = Carbon::now()->subDay(1);
+        // $yesterday = Sales::where('trans_id', 'like', $yesterday->format('Ymd') . '%')->sum('total_cost');
+        $from = $request->input('from') ?? Carbon::now()->subDay(1)->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
 
-        $today = Sales::where('trans_id', 'like', Carbon::now()->format('Ymd') . '%')->sum('total_cost');
+        $today = Sales::whereBetween('trans_date', [$from, $to])->selectRaw('sum(total_cost) as total_cost, trans_date')->groupBy('trans_date')->get();
 
-        return response()->json([$yesterday, $today]);
+        return response()->json(['data'=>$today]);
     }
 
     //Generate Report
