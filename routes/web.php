@@ -156,6 +156,7 @@ Route::group(['middleware' => 'admin'], function() {
 	Route::get('production', 'ProductionController@show')->name('prod-range');
 	Route::get('production/production-stats', 'ProductionController@prodStats');
 	Route::get('production/feed-consumption', 'ProductionController@feedConsumption');
+	Route::get('production/prod-perf', 'ProductionController@prodPerf');
 	Route::get('prod/pdf', 'ProductionController@ProdReport');
 
 	// Population

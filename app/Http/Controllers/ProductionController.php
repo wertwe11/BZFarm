@@ -74,11 +74,37 @@ class ProductionController extends Controller
         DB::statement("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
 
         $data = DB::table('chickens as c')
-        ->join(DB::raw("(SELECT DATE(changed_at) as feed_date, sum(quantity) as consumption FROM inventory_changes where unittype='grams' GROUP BY feed_date) AS o"), function ($join) {
+        ->join(DB::raw("(SELECT DATE(changed_at) as feed_date, sum(quantity) as consumption FROM inventory_changes where type='Feeds' and unittype='grams' GROUP BY feed_date) AS o"), function ($join) {
             $join->on(DB::raw('DATE(c.created_at)'), '=', 'o.feed_date');
         })->join(DB::raw("(SELECT DATE(updated_at) as feed_stock_date, sum(quantity) as stock_left FROM feeds where unit='grams' GROUP BY feed_stock_date) AS n"), function ($join) {
             $join->on(DB::raw('DATE(c.created_at)'), '=', 'n.feed_stock_date');
         })->select(DB::raw('sum(c.quantity) as current_chicken'), 'o.*', 'n.*')
+        ->whereBetween('c.created_at', [$from_time, $to_time])
+        ->groupBy(DB::raw('DATE(c.created_at)'))->get();
+
+        return response()->json($data);
+    } 
+
+    public function prodPerf(Request $request)
+    {
+        $from = $request->input('from') ?? Carbon::now()->toDateString();
+        $to = $request->input('to') ?? Carbon::now()->toDateString();
+
+        $from_time = $from . ' 00:00:00';
+        $to_time = $to . ' 23:59:00';
+
+        DB::statement("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+
+        $data = DB::table('chickens as c')
+        ->join(DB::raw("(SELECT created_at as egg_date, sum(jumbo + xlarge + large + medium + small + peewee + softshell) as total_eggs FROM eggs GROUP BY egg_date) AS o"), function ($join) {
+            $join->on(DB::raw('DATE(c.created_at)'), '=', 'o.egg_date');
+        })->join(DB::raw("(SELECT DATE(created_at) as chicken_dead_date, sum(quantity) as total_dead_chickens FROM dead_chickens GROUP BY chicken_dead_date) AS n"), function ($join) {
+            $join->on(DB::raw('DATE(c.created_at)'), '=', 'n.chicken_dead_date');
+        })->join(DB::raw("(SELECT date_added as pullet_date, sum(quantity) as current_pullets FROM pullets GROUP BY pullet_date) AS r"), function ($join) {
+            $join->on(DB::raw('DATE(c.created_at)'), '=', 'r.pullet_date');
+        })->join(DB::raw("(SELECT DATE(created_at) as pullet_dead_date, sum(quantity) as total_dead_pullets FROM dead_pullets GROUP BY pullet_dead_date) AS i"), function ($join) {
+            $join->on(DB::raw('DATE(c.created_at)'), '=', 'i.pullet_dead_date');
+        })->select(DB::raw('sum(c.quantity) as current_chicken'), 'o.*', 'n.*', 'r.*', 'i.*')
         ->whereBetween('c.created_at', [$from_time, $to_time])
         ->groupBy(DB::raw('DATE(c.created_at)'))->get();
 

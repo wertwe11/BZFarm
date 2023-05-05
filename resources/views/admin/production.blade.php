@@ -123,6 +123,37 @@
 		</div>
 	</div>
 </div>
+<div class="row">
+	<div class="col-lg-12">
+        <div class="card">
+	        <div class="card-header" data-background-color="red">
+	            <h4 class="title">Production performance</h4>
+	        </div>
+	        <div class="card-content">
+
+				<table class="table table-responsive table-hover" id="items">
+					<thead class="text-primary bold">
+						<tr>
+							<th>Date</th>
+							<th>Current Eggs</th>
+							<th>Egg Production Rate</th>
+							<th>Current Chickens</th>
+							<th>Chickens Mortality Rate</th>
+							<th>Current Pullets</th>
+							<th>Pullets Mortality Rate</th>
+							<th>Bird Mortality Rate</th>
+						</tr>
+					</thead>
+					<tbody id="pp">
+                        <tr>
+                            <td colspan="5"><center><b>No Record Found.</b></center></td>
+                        </tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
 @endsection
 
 @section ('scripts')
@@ -207,6 +238,37 @@ $(document).ready(function(){
                             <td>${perc.toFixed(2)} %</td>
                         </tr>`;
                 $('#fc').append(row);
+            }
+        },
+        error: function(data) {
+            console.log(data);
+        }
+    });
+    $.ajax({
+        url: "/production/prod-perf",
+        method: "GET",
+        success: function(data) {
+            console.log("prod-perf", data);
+            if(!data.length){
+               return false;
+            }
+            $('#pp').empty();
+            for(let i=0;i<data.length;i++){
+                const egg_perc = (parseFloat(data[i].total_eggs) / parseFloat(data[i].current_chicken)) * 100;
+                const chick_mort = (parseFloat(data[i].total_dead_pullets) / parseFloat(data[i].current_chicken)) * 100;
+                const pull_mort = (parseFloat(data[i].total_dead_pullets) / parseFloat(data[i].current_pullets)) * 100;
+                const bird_mort = ((parseFloat(data[i].total_dead_pullets) + parseFloat(data[i].total_dead_pullets)) / (parseFloat(data[i].current_chicken) + parseFloat(data[i].current_pullets))) * 100;
+                let row = `<tr>
+                            <td>${data[i].egg_date}</td>
+                            <td>${data[i].total_eggs}</td>
+                            <td>${egg_perc.toFixed(2)} %</td>
+                            <td>${data[i].current_chicken}</td>
+                            <td>${chick_mort.toFixed(2)} %</td>
+                            <td>${data[i].current_pullets}</td>
+                            <td>${pull_mort.toFixed(2)} %</td>
+                            <td>${bird_mort.toFixed(2)} %</td>
+                        </tr>`;
+                $('#pp').append(row);
             }
         },
         error: function(data) {
