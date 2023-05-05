@@ -76,10 +76,10 @@ class ProductionController extends Controller
         $data = DB::table('chickens as c')
         ->join(DB::raw("(SELECT DATE(changed_at) as feed_date, sum(quantity) as consumption FROM inventory_changes where type='Feeds' and unittype='grams' GROUP BY feed_date) AS o"), function ($join) {
             $join->on(DB::raw('DATE(c.created_at)'), '=', 'o.feed_date');
-        })->join(DB::raw("(SELECT DATE(updated_at) as feed_stock_date, sum(quantity) as stock_left FROM feeds where unit='grams' GROUP BY feed_stock_date) AS n"), function ($join) {
+        })->join(DB::raw("(SELECT DATE(updated_at) as feed_stock_date, sum(quantity) as stock_left, updated_at FROM feeds where unit='grams' GROUP BY feed_stock_date) AS n"), function ($join) {
             $join->on(DB::raw('DATE(c.created_at)'), '=', 'n.feed_stock_date');
         })->select(DB::raw('sum(c.quantity) as current_chicken'), 'o.*', 'n.*')
-        ->whereBetween('c.created_at', [$from_time, $to_time])
+        ->whereBetween('n.updated_at', [$from_time, $to_time])
         ->groupBy(DB::raw('DATE(c.created_at)'))->get();
 
         return response()->json($data);
